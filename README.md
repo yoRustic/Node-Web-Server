@@ -68,6 +68,12 @@ Big thanks to **[imbypass](https://github.com/imbypass)** for inspiration and fe
 
 ---
 
+## 💡 Interaction Reminder 
+
+If you use or fork this project, please consider leaving a star ⭐ on the GitHub repository to show your support!
+
+---
+
 ## 📜 License  
 
 This project is licensed under the **MIT License** – use it freely!  
