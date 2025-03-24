@@ -8,29 +8,29 @@ const settingsPath = require("path"); // Imports the Path module to work with fi
 // Default configuration object
 const defaultConfig = {
   "server": {
-    "port": 80,
-    "root": "./www/",
-    "logLevel": 3
+    "port": 80, // Default port for the server
+    "root": "./www/", // Default root directory for serving files
+    "logLevel": 3 // Default log level
   },
   "templates": {
-    "404": "./templates/404.html",
-    "403": "./templates/403.html"
+    "404": "./templates/404.html", // Path to the 404 error page template
+    "403": "./templates/403.html" // Path to the 403 error page template
   },
   "mimetypes": {
-    "html": "text/html",
-    "css": "text/css",
-    "js": "application/javascript",
-    "txt": "text/plain",
-    "png": "image/png",
-    "jpg": "image/jpeg",
-    "jpeg": "image/jpeg",
-    "gif": "image/gif",
-    "ico": "image/x-icon",
-    "ttf": "application/x-font-ttf",
-    "otf": "application/x-font-otf",
-    "bin": "application/octet-stream",
-    "mp4": "video/mp4",
-    "webm": "video/webm"
+    "html": "text/html", // MIME type for HTML files
+    "css": "text/css", // MIME type for CSS files
+    "js": "application/javascript", // MIME type for JavaScript files
+    "txt": "text/plain", // MIME type for text files
+    "png": "image/png", // MIME type for PNG images
+    "jpg": "image/jpeg", // MIME type for JPG images
+    "jpeg": "image/jpeg", // MIME type for JPEG images
+    "gif": "image/gif", // MIME type for GIF images
+    "ico": "image/x-icon", // MIME type for ICO files
+    "ttf": "application/x-font-ttf", // MIME type for TTF font files
+    "otf": "application/x-font-otf", // MIME type for OTF font files
+    "bin": "application/octet-stream", // MIME type for binary files
+    "mp4": "video/mp4", // MIME type for MP4 videos
+    "webm": "video/webm" // MIME type for WebM videos
   }
 };
 
@@ -66,51 +66,51 @@ if (!fs.existsSync(path)) {
 class logHandler { // Class to handle logging messages to the console with different colors based on the message type.
   success(string) {
     if (config.server.logLevel >= 3) {
-      this.logWithTimestamp(colorette.green(string));
+      this.logWithTimestamp(colorette.green(string)); // Log success messages in green
     }
   }
   failure(string) {
     if (config.server.logLevel >= 2) {
-    this.logWithTimestamp(colorette.red(string));
+      this.logWithTimestamp(colorette.red(string)); // Log failure messages in red
     }
   }
   warning(string) {
     if (config.server.logLevel >= 2) {
-    this.logWithTimestamp(colorette.yellow(string));
+      this.logWithTimestamp(colorette.yellow(string)); // Log warning messages in yellow
     }
   }
   debug(string) {
     if (config.server.logLevel >= 4) {
-    this.logWithTimestamp(colorette.cyan(string));
+      this.logWithTimestamp(colorette.cyan(string)); // Log debug messages in cyan
     }
   }
   info(string) {
     if (config.server.logLevel >= 3) {
-    this.logWithTimestamp(colorette.blue(string));
+      this.logWithTimestamp(colorette.blue(string)); // Log info messages in blue
     }
   }
   null(string) {
     if (config.server.logLevel >= 4) {
-    this.logWithTimestamp(colorette.gray(string));
+      this.logWithTimestamp(colorette.gray(string)); // Log null messages in gray
     }
   }
   blank() {
     if (config.server.logLevel >= 2) {
-    console.log(""); // Adds a blank line to separate log entries for different requests.
+      console.log(""); // Adds a blank line to separate log entries for different requests.
     }
   }
   // Function to log messages with a timestamp for debugging and monitoring HTTP requests.
-  logWithTimestamp(data){
+  logWithTimestamp(data) {
     console.log('[*] ' + new Date(Date.now()).toLocaleTimeString('en-US') + ' - ' + data); // Logs messages with a timestamp in 'HH:MM:SS AM/PM' format.
   }
 
   logMemoryUsage() {
-    const used = process.memoryUsage().heapUsed / 1024 / 1024;
-    const message = colorette.blue(`Memory Usage: ${Math.round(used * 100) / 100} MB`);
+    const used = process.memoryUsage().heapUsed / 1024 / 1024; // Calculate memory usage in MB
+    const memoryUsage = colorette.blue(`Memory Usage: ${Math.round(used * 100) / 100} MB`); // Format memory usage message in blue
 
     process.stdout.clearLine(0);  // Clear the last line
     process.stdout.cursorTo(0);   // Move cursor to the beginning
-    process.stdout.write(message); // Write the updated memory usage in color
+    process.stdout.write(memoryUsage); // Write the updated memory usage in color
   }
 }
 
@@ -152,10 +152,30 @@ function readFile(pathname) {
 // Creates an HTTP server that listens for requests, serves static files, and handles errors appropriately.
 const server = http.createServer((request, response) => {
   let pathname = url.parse(request.url).pathname; // Extracts the pathname from the requested URL (e.g., '/index.html').
-  
+
+  // API endpoint to get RAM usage
+  if (pathname === '/api/ram-usage') {
+    const used = process.memoryUsage().heapUsed / 1024 / 1024; // Calculate memory usage in MB
+    const memoryUsage = { memoryUsage: `${Math.round(used * 100) / 100} MB` }; // Format memory usage as JSON
+    response.writeHead(200, { 'Content-Type': 'application/json' }); // Set response header to JSON
+    response.write(JSON.stringify(memoryUsage)); // Write memory usage to response
+    response.end(); // End the response
+    logs.info("API Endpoint: /api/ram-usage"); // Log API endpoint access
+    logs.info(`Memory Usage: ${Math.round(used * 100) / 100} MB`); // Log memory usage
+    return;
+  }
+  if (pathname === '/api/hello') {
+    const Hello = "Hello World!"; // Define hello message
+    response.writeHead(200, { 'Content-Type': 'application/json' }); // Set response header to JSON
+    response.write(JSON.stringify(Hello)); // Write hello message to response
+    response.end(); // End the response
+    logs.info("API Endpoint: /api/hello"); // Log API endpoint access
+    return;
+  }
+
   // Remove the trailing slash from the pathname if present to standardize paths.
   if (pathname[pathname.length - 1] == '/')
-      pathname = pathname.substr(0, pathname.length - 1);
+    pathname = pathname.substr(0, pathname.length - 1);
 
   logUserIpv4(request); // Logs the client's IPv4 address.
   
